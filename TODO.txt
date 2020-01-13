@@ -1,0 +1,5 @@
+random if same order in execution_queue
+pamiętać że każde move zmienia i agenta i planszę - może funkcja do tego
+    no i że przesunięcie agenta to usunięcie go i wstawienie w nowe miejsce
+może generalnie metody do rzeczy typu chodzenie, odkładanie walizki, jestcośjeszcze?
+comprehensive list of agent states|boarding methods
