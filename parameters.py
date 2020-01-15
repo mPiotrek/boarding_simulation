@@ -12,7 +12,7 @@ total_seats  = plane_length * seats_per_row
 max_shuffle  = max(seats_left, seats_right)-1
 
 # Space for waiting before boarding|shuffles at the back of the plane
-board_before = total_seats
+board_before = total_seats + 1 # x=-1 is critical area for some strategies
 board_after  = max_shuffle
 board_length = board_before + plane_length + board_after
 board_width  = plane_width
@@ -20,8 +20,10 @@ board_width  = plane_width
 valid_xs = range(-seats_right, aisle_width+seats_left)
 valid_ys = range(-board_before, plane_length+board_after)
 
-walk_tick_cnt= 5
+walk_tick_cnt= 2
 skip_tick_cnt= 1
+
+framerate = 30
 
 # this value can be changed in the test boarding methods
 total_agents=total_seats

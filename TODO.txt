@@ -1,5 +1,6 @@
 recording to|from file
 gaussian distribution luggage
+embed ids in the agents
 comprehensive list of agent states|boarding methods
 check all tick_cnt occurences
 [częściowo jest] random if same order in execution_queue!

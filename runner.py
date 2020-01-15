@@ -4,13 +4,14 @@ from definitions import *
 from parameters import *
 
 
-def run(boarding_method, limit=1000, debug=False):
+def run(boarding_method, limit=2500, debug=False):
     board = [[None for _ in range(board_width)]
              for _ in range(board_length)]
 
     execution_queue = PriorityQueue()
 
-    recording = deepcopy(initialize(board, execution_queue, boarding_method))
+    yield from initialize(board, execution_queue, boarding_method)
+    # recording = deepcopy(initialize(board, execution_queue, boarding_method))
 
     while not execution_queue.empty():
         time, agent = execution_queue.get()
@@ -25,16 +26,20 @@ def run(boarding_method, limit=1000, debug=False):
                 (time+ret, agent)
             )
 
-        recording.append((id(agent), time, deepcopy(agent)))
+        yield (id(agent), time, agent)
+        # recording.append((id(agent), time, deepcopy(agent)))
         if time >= limit:
             break
 
-    if debug:
+    if True or debug:
         while not execution_queue.empty():
             print(execution_queue.get())
 
-    return recording
+    # return recording
 
 
 if __name__ == '__main__':
-    run('_test_b2f', limit=1000, debug=True)
+    while True:
+        ret = list(run('random_order', limit=2500, debug=True))
+        if ret[-1][2].state != 'done':
+            break

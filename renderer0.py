@@ -63,7 +63,7 @@ seats = []
 agents = defaultdict(lambda: [None, None, get_passenger_entity()])
 
 
-def play(boarding_mode) -> None:
+def play(boarding_mode, limit=2500, debug=False) -> None:
     clock = pygame.time.Clock()
     # grid size 3 * 2 * scale
     screen = pygame.display.set_mode([(parameters.plane_length+2*parameters.max_shuffle) * object_size,
@@ -71,7 +71,7 @@ def play(boarding_mode) -> None:
 
     prev_time = 0
     curr_time = 0
-    for agent_id, time, agent in runner.run(boarding_mode, limit=10000):
+    for agent_id, time, agent in runner.run(boarding_mode, limit=limit, debug=debug):
         # simulation logic
         if time is not None:
             curr_time = time
@@ -83,6 +83,7 @@ def play(boarding_mode) -> None:
         agents[agent_id][1] = y
         if (time is not None) and (time > prev_time):
             # rendering
+            clock.tick(parameters.framerate)
             render(chain(seats, agents.values()), screen)
 
             # handle events
@@ -91,15 +92,14 @@ def play(boarding_mode) -> None:
                    is_window_close_button_clicked(event)
                    for event in pygame.event.get()):
                 break
-
-            clock.tick(60)
         prev_time = curr_time
-    clock.tick(4)
-    while not any(is_esc_down(event)
-                  or
-                  is_window_close_button_clicked(event)
-                  for event in pygame.event.get()):
-        pass
+    else:
+        clock.tick(4)
+        while not any(is_esc_down(event)
+                      or
+                      is_window_close_button_clicked(event)
+                      for event in pygame.event.get()):
+            pass
 
 
-play('random_order')
+play('window_middle_aisle', limit=2500, debug=True)

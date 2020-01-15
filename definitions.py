@@ -260,7 +260,7 @@ class Agent:
             elif self.state.endswith('c'):
                 if y != 0:
                     dy = -y//abs(y)
-                    if board[x][y+dy] is None and no_shuffle_conflict(board, x, 0):
+                    if board[x][y+dy] is None and no_shuffle_conflict(board, x, 0) and board[x][2*y].state.startswith('shuffle'):
                         self.move(board, 0, dy)
                         return walk_tick_cnt
                     else:
@@ -392,17 +392,67 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
     if False:
         pass
     elif boarding_method == 'random_order':
-        time_agents = [(0, Agent(Point(tx, ty*(2*s-1)), Point(0, 0), 0)) for tx in range(plane_length)
+        time_agents = [(0, Agent(Point(tx, ty*(2*s-1)), Point(0, 0), None)) for tx in range(plane_length)
                        for ty in range(1, 4) for s in range(2)]
         shuffle(time_agents)
         for i, (time, agent) in enumerate(time_agents):
-            agent.coords.x = i-total_agents
-    elif boarding_method == '_test_b2f':
-        time_agents = [(0, Agent(Point(tx, ty*(2*s-1)), Point(tx*6+s*3+ty-total_agents, 0), 0)) for tx in range(plane_length)
+            agent.coords.x = i-total_agents-1
+    elif boarding_method == 'back_to_front':
+        time_agents = [(0, Agent(Point(tx, ty*(2*s-1)), Point(tx*6+s*3+(ty-1)-1-total_agents, 0), None)) for tx in range(plane_length)
                        for ty in range(1, 4) for s in range(2)]
-    elif boarding_method == '_test_f2b':
-        time_agents = [(0, Agent(Point(tx, ty*(2*s-1)), Point(-tx*6-s*3-ty-1, 0), 0)) for tx in range(plane_length)
+    elif boarding_method == 'front_to_back':
+        time_agents = [(0, Agent(Point(tx, (4-ty)*(2*s-1)), Point(-tx*6-s*3-(ty-1)-1, 0), None)) for tx in range(plane_length)
                        for ty in range(1, 4) for s in range(2)]
+    elif boarding_method == 'back_to_front_four':
+        time_agentss = [[(0, Agent(Point(plane_length//4*(3-group) + tx, ty*(2*s-1)), Point(0, 0), group)) for tx in range(plane_length//4)
+                         for ty in range(1, 4) for s in range(2)] for group in range(4)]
+        for time_agents in time_agentss:
+            shuffle(time_agents)
+        for group, time_agents in enumerate(time_agentss):
+            for i, (time, agent) in enumerate(time_agents):
+                # 0,1,.. -> -2,-3,..
+                agent.coords.x = -(total_agents//4*group+i+2)
+        time_agents = chain(*time_agentss)
+    elif boarding_method == 'front_to_back_four':
+        time_agentss = [[(0, Agent(Point(plane_length//4*group + tx, ty*(2*s-1)), Point(0, 0), group)) for tx in range(plane_length//4)
+                         for ty in range(1, 4) for s in range(2)] for group in range(4)]
+        for time_agents in time_agentss:
+            shuffle(time_agents)
+        for group, time_agents in enumerate(time_agentss):
+            for i, (time, agent) in enumerate(time_agents):
+                # 0,1,.. -> -2,-3,..
+                agent.coords.x = -(total_agents//4*group+i+2)
+        time_agents = chain(*time_agentss)
+    elif boarding_method == 'window_middle_aisle':
+        time_agentss = [[(0, Agent(Point(tx, side*column), Point(0, 0), column))
+                         for side in {-1, 1} for tx in range(0, plane_length)] for column in [3, 2, 1]]
+        for time_agents in time_agentss:
+            shuffle(time_agents)
+        for group, time_agents in enumerate(time_agentss):
+            for i, (time, agent) in enumerate(time_agents):
+                # 0,1,.. -> -2,-3,..
+                agent.coords.x = -(total_agents//3*group+i+2)
+        time_agents = chain(*time_agentss)
+    elif boarding_method == 'aisle_middle_window':
+        time_agentss = [[(0, Agent(Point(tx, side*column), Point(0, 0), column))
+                         for side in {-1, 1} for tx in range(0, plane_length)] for column in [1, 2, 3]]
+        for time_agents in time_agentss:
+            shuffle(time_agents)
+        for group, time_agents in enumerate(time_agentss):
+            for i, (time, agent) in enumerate(time_agents):
+                # 0,1,.. -> -2,-3,..
+                agent.coords.x = -(total_agents//3*group+i+2)
+        time_agents = chain(*time_agentss)
+    elif boarding_method == 'steffen_perfect':
+        time_agents = [(0, Agent(Point((plane_length-2-tx)+shift, column*side), Point(0, 0), None)) for column in {3, 2, 1} for shift in {
+            1, 0} for side in {-1, 1} for tx in reversed(range(0, plane_length, 2))]
+        for i, (time, agent) in enumerate(time_agents):
+            agent.coords.x = i-total_agents-1
+    elif boarding_method == 'steffen_modified':
+        time_agents = [(0, Agent(Point((plane_length-2-tx)+shift, column*side), Point(0, 0), None)) for shift in {
+            1, 0} for side in {-1, 1} for tx in reversed(range(0, plane_length, 2)) for column in {3, 2, 1}]
+        for i, (time, agent) in enumerate(time_agents):
+            agent.coords.x = i-total_agents-1
     elif boarding_method == '_test_0wr':
         target = Point(0, -seats_right)
         coords = Point(-1, aisle_y)
@@ -478,7 +528,7 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
             agents.append((id(agent), 0, agent))
         return agents
     else:
-        return NotImplemented
+        raise Exception(f"'{boarding_method}' boarding method not implemented")
 
     for time, agent in time_agents:
         board[agent.coords.x][agent.coords.y] = agent
