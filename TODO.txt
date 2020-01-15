@@ -1,5 +1,16 @@
-random if same order in execution_queue
+gaussian distribution luggage
+comprehensive list of agent states|boarding methods
+check all tick_cnt occurences
+[częściowo jest] random if same order in execution_queue!
+    jak to jest heap, to używanie random do porównania zmienia tylko sąsiadujące elementy
+może dodać jakoś tile dependency? że agent jest wpychany na kolejkę dopiero gdy jakieś pole się zwolni?
+może generalnie metody do rzeczy typu chodzenie, odkładanie walizki, jestcośjeszcze?
+typing?
+
+DONE:
 pamiętać że każde move zmienia i agenta i planszę - może funkcja do tego
     no i że przesunięcie agenta to usunięcie go i wstawienie w nowe miejsce
-może generalnie metody do rzeczy typu chodzenie, odkładanie walizki, jestcośjeszcze?
-comprehensive list of agent states|boarding methods
+co z shuffle na końcu samolotu
+[trochę jest trochę się nie da]: ładne, optymalne shuffle - bez chodzenie dalej niż potrzeba (tymczasowo stan 'waiting' nic nie robi) ORAZ BEZ PRZEKAZYWANIA KOLEJKI
+fix shuffle end detection x3 (można wykorzystać to i jedynie sprawdzać lewo|prawo)
+[chybadone]: b - obsługa kolejnego który przyszedł
