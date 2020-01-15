@@ -1,7 +1,7 @@
 from dataclasses import dataclass, astuple
 from queue import PriorityQueue
 from parameters import *
-from random import getrandbits
+from random import getrandbits, shuffle
 from itertools import chain
 
 
@@ -9,7 +9,7 @@ from itertools import chain
 class Point:
     x: int
     y: int
-    
+
     def __str__(self):
         return f"(x={self.x}, y={self.y})"
 
@@ -28,10 +28,10 @@ class Agent:
     coords: Point
     group:  str
     state:  str = 'go'
-    
+
     def __str__(self):
         return f"(t={str(self.target):>13}, c={str(self.coords):>13}, g={self.group}, s={self.state})"
-    
+
     # this may very well break execution_queue, so disabled for now
     # ensures random ordering in the execution_queue for simultaneous agents.
     def __lt__(self, other):
@@ -242,10 +242,13 @@ class Agent:
                             return skip_tick_cnt
                 else:  # now shuffle ends
                     if (board[x-2][0] is not None and
-                        board[x-2][0].target.x == self.target.x and # in same row
-                        board[x-2][0].target.y * self.target.y > 0 and # on same side
-                        not self.state.endswith('2b') and # it's The One, who elese could it be
-                        not (abs(board[x-2][0].target.y) > abs(self.target.y))): # either way will be first
+                        # in same row
+                        board[x-2][0].target.x == self.target.x and
+                        # on same side
+                        board[x-2][0].target.y * self.target.y > 0 and
+                        # it's The One, who elese could it be
+                        not self.state.endswith('2b') and
+                            not (abs(board[x-2][0].target.y) > abs(self.target.y))):  # either way will be first
                         return skip_tick_cnt
                     else:
                         if board[x-1][0] is None:
@@ -270,8 +273,9 @@ class Agent:
                         return skip_tick_cnt
                 elif x == self.target.x+1:
                     if (board[x-2][0] is not None and
-                        board[x-2][0].target.x == self.target.x and # in same row
-                        board[x-2][0].target.y * self.target.y > 0): # on same side
+                        # in same row
+                        board[x-2][0].target.x == self.target.x and
+                            board[x-2][0].target.y * self.target.y > 0):  # on same side
                         if board[x+1][0] is None:
                             self.move(board, 1, 0)
                             return walk_tick_cnt
@@ -286,8 +290,9 @@ class Agent:
                             return skip_tick_cnt
                 else:
                     if (board[x-3][0] is not None and
-                        board[x-3][0].target.x == self.target.x and # in same row
-                        board[x-3][0].target.y * self.target.y > 0): # on same side
+                        # in same row
+                        board[x-3][0].target.x == self.target.x and
+                            board[x-3][0].target.y * self.target.y > 0):  # on same side
                         return skip_tick_cnt
                     else:  # idziemy w lewo
                         if board[x-1][0] is None:
@@ -336,15 +341,15 @@ def no_shuffle_other(board, tx, ty):
     return all(
         board[tx+dx][0] is None
         or
-        board[tx+dx][0].target.x != tx # not in shuffle here
+        board[tx+dx][0].target.x != tx  # not in shuffle here
         or
-        board[tx+dx][0].target.y * ty > 0 # target on the same side
+        board[tx+dx][0].target.y * ty > 0  # target on the same side
         and
         True
-         # idę window & shuffle_2 = moje
-         # idę window & shuffle_1 & idzie middle = moje
-         # idę window & shuffle_1 & idzie ailse = mogę iść, bo jeśli nie moje to poczekam
-         # idę middle = jak się wepchnę to będzie spoko
+        # idę window & shuffle_2 = moje
+        # idę window & shuffle_1 & idzie middle = moje
+        # idę window & shuffle_1 & idzie ailse = mogę iść, bo jeśli nie moje to poczekam
+        # idę middle = jak się wepchnę to będzie spoko
         for dx
         in range(1, 1+max_shuffle)
     )
@@ -386,35 +391,34 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
 
     if False:
         pass
+    elif boarding_method == 'random_order':
+        time_agents = [(0, Agent(Point(tx, ty*(2*s-1)), Point(0, 0), 0)) for tx in range(plane_length)
+                       for ty in range(1, 4) for s in range(2)]
+        shuffle(time_agents)
+        for i, (time, agent) in enumerate(time_agents):
+            agent.coords.x = i-total_agents
     elif boarding_method == '_test_b2f':
-        agents = [Agent(Point(tx, ty*(2*s-1)), Point(tx*6+s*3+ty-board_before, 0), 0) for tx in range(plane_length)
-                       for ty in range(1,4) for s in range(2)]
-        for agent in agents:
-            board[agent.coords.x][agent.coords.y] = agent
-            execution_queue.put((0, agent))
-        return
+        time_agents = [(0, Agent(Point(tx, ty*(2*s-1)), Point(tx*6+s*3+ty-total_agents, 0), 0)) for tx in range(plane_length)
+                       for ty in range(1, 4) for s in range(2)]
     elif boarding_method == '_test_f2b':
-        agents = [Agent(Point(tx, ty*(2*s-1)), Point(-tx*6-s*3-ty-1, 0), 0) for tx in range(plane_length)
-                       for ty in range(1,4) for s in range(2)]
-        for agent in agents:
-            board[agent.coords.x][agent.coords.y] = agent
-            execution_queue.put((0, agent))
-        return
+        time_agents = [(0, Agent(Point(tx, ty*(2*s-1)), Point(-tx*6-s*3-ty-1, 0), 0)) for tx in range(plane_length)
+                       for ty in range(1, 4) for s in range(2)]
     elif boarding_method == '_test_0wr':
         target = Point(0, -seats_right)
-        coords = Point(-board_before, aisle_y)
+        coords = Point(-1, aisle_y)
         x, y = astuple(coords)
 
         agent = Agent(target, coords, 0)
 
         board[x][y] = agent
         execution_queue.put((0, agent))
-        return
+        return [id(agent), 0, agent]
     elif boarding_method == '_test_2r_shuffle':
         t1 = Point(0, -seats_right+0)
         t2 = Point(0, -seats_right+1)
-        c1 = Point(-board_before+0, aisle_y)
-        c2 = Point(-board_before+1, aisle_y)
+        c1 = Point(-2+0, aisle_y)
+        c2 = Point(-2+1, aisle_y)
+        agents = []
 
         for target, coords in [(t1, c1), (t2, c2)]:
             x, y = astuple(coords)
@@ -422,12 +426,14 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
 
             board[x][y] = agent
             execution_queue.put((0, agent))
-        return
+            agents.append((id(agent), 0, agent))
+        return agents
     elif boarding_method == '_test_2s_shuffle':
         t1 = Point(0, -seats_right+0)
         t2 = Point(0, -seats_right+1)
-        c1 = Point(-board_before+1, aisle_y)
-        c2 = Point(-board_before+0, aisle_y)
+        c1 = Point(-2+1, aisle_y)
+        c2 = Point(-2+0, aisle_y)
+        agents = []
 
         for target, coords in [(t1, c1), (t2, c2)]:
             x, y = astuple(coords)
@@ -435,14 +441,16 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
 
             board[x][y] = agent
             execution_queue.put((0, agent))
-        return
+            agents.append((id(agent), 0, agent))
+        return agent
     elif boarding_method == '_test_3r_shuffle':
         t1 = Point(0, -seats_right+0)
         t2 = Point(0, -seats_right+1)
         t3 = Point(0, -seats_right+2)
-        c1 = Point(-board_before+0, aisle_y)
-        c2 = Point(-board_before+1, aisle_y)
-        c3 = Point(-board_before+2, aisle_y)
+        c1 = Point(-3+0, aisle_y)
+        c2 = Point(-3+1, aisle_y)
+        c3 = Point(-3+2, aisle_y)
+        agents = []
 
         for target, coords in [(t1, c1), (t2, c2), (t3, c3)]:
             x, y = astuple(coords)
@@ -450,14 +458,16 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
 
             board[x][y] = agent
             execution_queue.put((0, agent))
-        return
+            agents.append((id(agent), 0, agent))
+        return agents
     elif boarding_method == '_test_3s_shuffle':
         t1 = Point(0, -seats_right+0)
         t2 = Point(0, -seats_right+1)
         t3 = Point(0, -seats_right+2)
-        c1 = Point(-board_before+2, aisle_y)
-        c2 = Point(-board_before+1, aisle_y)
-        c3 = Point(-board_before+0, aisle_y)
+        c1 = Point(-3+2, aisle_y)
+        c2 = Point(-3+1, aisle_y)
+        c3 = Point(-3+0, aisle_y)
+        agents = []
 
         for target, coords in [(t1, c1), (t2, c2), (t3, c3)]:
             x, y = astuple(coords)
@@ -465,4 +475,13 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
 
             board[x][y] = agent
             execution_queue.put((0, agent))
-        return
+            agents.append((id(agent), 0, agent))
+        return agents
+    else:
+        return NotImplemented
+
+    for time, agent in time_agents:
+        board[agent.coords.x][agent.coords.y] = agent
+        execution_queue.put((time, agent))
+
+    return [(id(agent), time, agent)for time, agent in time_agents]
