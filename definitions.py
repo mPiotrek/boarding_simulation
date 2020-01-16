@@ -1,8 +1,9 @@
 from dataclasses import dataclass, astuple
 from queue import PriorityQueue
 from parameters import *
-from random import getrandbits, shuffle, gauss
+from random import getrandbits, shuffle, gauss, randint
 from itertools import chain
+import pickle
 
 
 @dataclass
@@ -27,7 +28,7 @@ class Agent:
     target: Point
     coords: Point
     group:  str
-    state:  str = 'go' if not no_shuffles else 'ns_go'
+    state:  str = 'go'
 
     def __str__(self):
         return f"(t={str(self.target):>13}, c={str(self.coords):>13}, g={self.group}, s={self.state})"
@@ -51,7 +52,7 @@ class Agent:
             raise Exception(
                 f"{self}, tried to move by [{dx},{dy}] to the occupied location")
 
-    def act(self, board, execution_queue, time):
+    def act(self, board, execution_queue, time, no_shuffles=False, no_stowing=False, mu=10):
         """
         Agent modifies its state based on the board state and returns the duration
         of the current action. Return value None means end of the execution.
@@ -61,6 +62,9 @@ class Agent:
         def go():
             if y != aisle_y:
                 raise Exception(f"Agent {self} not in aisle in the 'go' state")
+
+            if no_shuffles:
+                self.state = 'ns_go'
 
             if x < self.target.x-1:
                 if (board[x+1][y] is None) and no_shuffle_conflict(board, x+1, y):
@@ -74,10 +78,11 @@ class Agent:
             else:
                 raise Exception(
                     f"Agent {self} went past its target in the 'go' state")
-        
+
         def ns_go():
             if y != aisle_y:
-                raise Exception(f"Agent {self} not in aisle in the 'ns_go' state")
+                raise Exception(
+                    f"Agent {self} not in aisle in the 'ns_go' state")
 
             if x < self.target.x:
                 if board[x+1][y] is None:
@@ -430,6 +435,11 @@ def get_shuffle_need(board, x, y):
             for _y
             in ys
         )
+
+
+def pickle_as(name, data):
+    with open(f"./pickle_dumps/{name}_{randint(0,999999)}.pkl", 'wb') as f:
+        pickle.dump(data, f)
 
 
 def initialize(board, execution_queue: PriorityQueue, boarding_method):

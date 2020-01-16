@@ -2,11 +2,9 @@ from queue import PriorityQueue
 from copy import deepcopy
 from definitions import *
 from parameters import *
-from random import randint
-import pickle
 
 
-def run(boarding_method, limit=2500, debug=False):
+def run(boarding_method, limit=2500, no_shuffles=False, no_stowing=False, mu=10, debug=False):
     board = [[None for _ in range(board_width)]
              for _ in range(board_length)]
 
@@ -19,7 +17,8 @@ def run(boarding_method, limit=2500, debug=False):
         time, agent = execution_queue.get()
         if debug:
             print(f"{id(agent)%10000:>4} {time} : {agent}", end='')
-        ret = agent.act(board, execution_queue, time)
+        ret = agent.act(board, execution_queue, time,
+                        no_shuffles=no_shuffles, no_stowing=no_stowing, mu=mu)
         if debug:
             print(f" -> {agent}")
 
@@ -41,19 +40,4 @@ def run(boarding_method, limit=2500, debug=False):
 
 
 if __name__ == '__main__':
-    # while True:
-    randid = randint(0,999999)
-    datapoints = []
-    for i in range(200):
-        datapoints[i] = dict()
-        print(i)
-        for boarding_mode in ['random_order', 'back_to_front', 'front_to_back', 'back_to_front_four', 'front_to_back_four', 'window_middle_aisle', 'steffen_perfect', 'steffen_modified']:
-            ret = list(run(boarding_mode, limit=2500, debug=True))
-            datapoints[i][boarding_mode] = None
-            if ret[-1][2].state != 'done':
-                continue
-            datapoints[i][boarding_mode] = max(time for _,time,_ in ret if time is not None)
-        print(datapoints[i])
-    with open(f"./pickle_dumps/stats_{randid}_.pkl", 'wb') as f:
-        pickle.dump(datapoints, f)
-    print("done")
+    pass

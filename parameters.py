@@ -23,12 +23,13 @@ valid_ys = range(-board_before, plane_length+board_after)
 walk_tick_cnt= 5
 skip_tick_cnt= 2
 
-mu = 10
-sigma = 4/3
 
 framerate = 45
-no_shuffles = False
-no_stowing = False
+# Controlled by a passed parameter:
+# # no_shuffles = False
+# # no_stowing = False
+# # mu = 10
+sigma = 4/3
 
 # this value can be changed by the test boarding methods
 total_agents = total_seats

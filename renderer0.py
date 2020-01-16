@@ -59,11 +59,10 @@ def render(entites, screen: Surface) -> None:
     pygame.display.update()
 
 
-seats = []
-agents = defaultdict(lambda: [None, None, get_passenger_entity()])
-
-
 def play(boarding_mode, limit=2500, debug=False) -> None:
+    seats = []
+    agents = defaultdict(lambda: [None, None, get_passenger_entity()])
+
     clock = pygame.time.Clock()
     # grid size 3 * 2 * scale
     screen = pygame.display.set_mode([(parameters.plane_length+2*parameters.max_shuffle) * object_size,
@@ -102,11 +101,11 @@ def play(boarding_mode, limit=2500, debug=False) -> None:
             pass
 
 
-# play('random_order', limit=2500, debug=True)
-# play('back_to_front', limit=2500, debug=True)
-# play('front_to_back', limit=2500, debug=True)
-# play('back_to_front_four', limit=2500, debug=True)
-# play('front_to_back_four', limit=2500, debug=True)
+play('random_order', limit=2500, debug=True)
+play('back_to_front', limit=2500, debug=True)
+play('front_to_back', limit=2500, debug=True)
+play('back_to_front_four', limit=2500, debug=True)
+play('front_to_back_four', limit=2500, debug=True)
 play('window_middle_aisle', limit=2500, debug=True)
-# play('steffen_perfect', limit=2500, debug=True)
-# play('steffen_modified', limit=2500, debug=True)
+play('steffen_perfect', limit=2500, debug=True)
+play('steffen_modified', limit=2500, debug=True)
