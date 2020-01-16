@@ -1,5 +1,4 @@
 recording to|from file
-gaussian distribution luggage
 embed ids in the agents
 comprehensive list of agent states|boarding methods
 check all tick_cnt occurences
@@ -10,6 +9,8 @@ może generalnie metody do rzeczy typu chodzenie, odkładanie walizki, jestcośj
 typing?
 
 DONE:
+no_shuffle flag
+gaussian distribution luggage and ns_luggage
 pamiętać że każde move zmienia i agenta i planszę - może funkcja do tego
     no i że przesunięcie agenta to usunięcie go i wstawienie w nowe miejsce
 co z shuffle na końcu samolotu

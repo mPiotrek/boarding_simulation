@@ -20,10 +20,15 @@ board_width  = plane_width
 valid_xs = range(-seats_right, aisle_width+seats_left)
 valid_ys = range(-board_before, plane_length+board_after)
 
-walk_tick_cnt= 2
-skip_tick_cnt= 1
+walk_tick_cnt= 5
+skip_tick_cnt= 2
 
-framerate = 30
+mu = 10
+sigma = 4/3
 
-# this value can be changed in the test boarding methods
-total_agents=total_seats
+framerate = 45
+no_shuffles = False
+no_stowing = False
+
+# this value can be changed by the test boarding methods
+total_agents = total_seats

@@ -102,11 +102,11 @@ def play(boarding_mode, limit=2500, debug=False) -> None:
             pass
 
 
-play('random_order', limit=2500, debug=True)
+# play('random_order', limit=2500, debug=True)
 # play('back_to_front', limit=2500, debug=True)
 # play('front_to_back', limit=2500, debug=True)
 # play('back_to_front_four', limit=2500, debug=True)
 # play('front_to_back_four', limit=2500, debug=True)
-# play('window_middle_aisle', limit=2500, debug=True)
+play('window_middle_aisle', limit=2500, debug=True)
 # play('steffen_perfect', limit=2500, debug=True)
 # play('steffen_modified', limit=2500, debug=True)

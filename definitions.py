@@ -1,7 +1,7 @@
 from dataclasses import dataclass, astuple
 from queue import PriorityQueue
 from parameters import *
-from random import getrandbits, shuffle
+from random import getrandbits, shuffle, gauss
 from itertools import chain
 
 
@@ -27,7 +27,7 @@ class Agent:
     target: Point
     coords: Point
     group:  str
-    state:  str = 'go'
+    state:  str = 'go' if not no_shuffles else 'ns_go'
 
     def __str__(self):
         return f"(t={str(self.target):>13}, c={str(self.coords):>13}, g={self.group}, s={self.state})"
@@ -60,7 +60,7 @@ class Agent:
 
         def go():
             if y != aisle_y:
-                raise Exception(f"Agent {self} not in aisle in 'go' state")
+                raise Exception(f"Agent {self} not in aisle in the 'go' state")
 
             if x < self.target.x-1:
                 if (board[x+1][y] is None) and no_shuffle_conflict(board, x+1, y):
@@ -74,6 +74,23 @@ class Agent:
             else:
                 raise Exception(
                     f"Agent {self} went past its target in the 'go' state")
+        
+        def ns_go():
+            if y != aisle_y:
+                raise Exception(f"Agent {self} not in aisle in the 'ns_go' state")
+
+            if x < self.target.x:
+                if board[x+1][y] is None:
+                    self.move(board, 1, 0)
+                    return walk_tick_cnt
+                else:
+                    return skip_tick_cnt
+            elif x == self.target.x:
+                self.state = 'ns_luggage'
+                return skip_tick_cnt
+            else:
+                raise Exception(
+                    f"Agent {self} went past its target in the 'ns_go' state")
 
         def my_turn():
             if x != self.target.x-1:
@@ -142,7 +159,18 @@ class Agent:
                     f"Agent {self} not in aisle in 'luggage' state")
 
             self.state = 'entering'
-            return skip_tick_cnt
+            return 0 if no_stowing else abs(int(gauss(mu, sigma)))
+
+        def ns_luggage():
+            if x != self.target.x:
+                raise Exception(
+                    f"Agent {self} not in its row in the 'ns_luggage' state")
+            if y != aisle_y:
+                raise Exception(
+                    f"Agent {self} not in aisle in 'ns_luggage' state")
+
+            self.state = 'ns_entering'
+            return 0 if no_stowing else abs(int(gauss(mu, sigma)))
 
         def entering():
             if x != self.target.x:
@@ -160,6 +188,19 @@ class Agent:
             else:
                 self.state = 'is_that_all'
                 return skip_tick_cnt
+
+        def ns_entering():
+            if x != self.target.x:
+                raise Exception(
+                    f"Agent {self} not in its row in the 'ns_entering' state")
+
+            if y != self.target.y:
+                dy = (self.target.y - y)
+                self.move(board, 0, dy)
+                return walk_tick_cnt*abs(dy)
+            else:
+                self.state = 'ns_done'
+                return None
 
         def is_that_all():
             if x != self.target.x:
@@ -307,12 +348,18 @@ class Agent:
 
         if self.state == 'go':
             return go()
+        if self.state == 'ns_go':
+            return ns_go()
         elif self.state == 'my_turn':
             return my_turn()
         elif self.state == 'luggage':
             return luggage()
+        elif self.state == 'ns_luggage':
+            return ns_luggage()
         elif self.state == 'entering':
             return entering()
+        elif self.state == 'ns_entering':
+            return ns_entering()
         elif self.state == 'is_that_all':
             return is_that_all()
         elif self.state == 'waiting':
@@ -322,6 +369,9 @@ class Agent:
         elif self.state == 'done':
             raise Exception(
                 "Agent {self} in state 'done' appeared in the 'execution_queue'")
+        elif self.state == 'ns_done':
+            raise Exception(
+                "Agent {self} in state 'ns_done' appeared in the 'execution_queue'")
         else:
             return None
 

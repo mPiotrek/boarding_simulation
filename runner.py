@@ -43,13 +43,17 @@ def run(boarding_method, limit=2500, debug=False):
 if __name__ == '__main__':
     # while True:
     randid = randint(0,999999)
+    datapoints = []
     for i in range(200):
-        d = dict()
+        datapoints[i] = dict()
+        print(i)
         for boarding_mode in ['random_order', 'back_to_front', 'front_to_back', 'back_to_front_four', 'front_to_back_four', 'window_middle_aisle', 'steffen_perfect', 'steffen_modified']:
             ret = list(run(boarding_mode, limit=2500, debug=True))
-            d[boarding_mode] = None
+            datapoints[i][boarding_mode] = None
             if ret[-1][2].state != 'done':
                 continue
-            d[boarding_mode] = max(time for _,time,_ in ret if time is not None)
-        with open(f"./pickle_dumps/stats_{randid}_{i}.pkl", 'wb') as f:
-            pickle.dump(d, f)
+            datapoints[i][boarding_mode] = max(time for _,time,_ in ret if time is not None)
+        print(datapoints[i])
+    with open(f"./pickle_dumps/stats_{randid}_.pkl", 'wb') as f:
+        pickle.dump(datapoints, f)
+    print("done")
