@@ -2,6 +2,8 @@ from queue import PriorityQueue
 from copy import deepcopy
 from definitions import *
 from parameters import *
+from random import randint
+import pickle
 
 
 def run(boarding_method, limit=2500, debug=False):
@@ -39,7 +41,15 @@ def run(boarding_method, limit=2500, debug=False):
 
 
 if __name__ == '__main__':
-    while True:
-        ret = list(run('random_order', limit=2500, debug=True))
-        if ret[-1][2].state != 'done':
-            break
+    # while True:
+    randid = randint(0,999999)
+    for i in range(200):
+        d = dict()
+        for boarding_mode in ['random_order', 'back_to_front', 'front_to_back', 'back_to_front_four', 'front_to_back_four', 'window_middle_aisle', 'steffen_perfect', 'steffen_modified']:
+            ret = list(run(boarding_mode, limit=2500, debug=True))
+            d[boarding_mode] = None
+            if ret[-1][2].state != 'done':
+                continue
+            d[boarding_mode] = max(time for _,time,_ in ret if time is not None)
+        with open(f"./pickle_dumps/stats_{randid}_{i}.pkl", 'wb') as f:
+            pickle.dump(d, f)
