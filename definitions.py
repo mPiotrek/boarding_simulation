@@ -438,7 +438,7 @@ def get_shuffle_need(board, x, y):
 
 
 def pickle_as(name, data):
-    with open(f"./pickle_dumps/{name}_{randint(0,999999)}.pkl", 'wb') as f:
+    with open(f"./pickle_dumps/{name}.pkl", 'wb') as f:
         pickle.dump(data, f)
 
 
