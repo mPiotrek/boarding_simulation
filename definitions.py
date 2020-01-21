@@ -522,7 +522,7 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
 
         board[x][y] = agent
         execution_queue.put((0, agent))
-        return [id(agent), 0, agent]
+        return [(0, agent)]
     elif boarding_method == '_test_2r_shuffle':
         t1 = Point(0, -seats_right+0)
         t2 = Point(0, -seats_right+1)
@@ -536,7 +536,7 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
 
             board[x][y] = agent
             execution_queue.put((0, agent))
-            agents.append((id(agent), 0, agent))
+            agents.append((0, agent))
         return agents
     elif boarding_method == '_test_2s_shuffle':
         t1 = Point(0, -seats_right+0)
@@ -551,7 +551,7 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
 
             board[x][y] = agent
             execution_queue.put((0, agent))
-            agents.append((id(agent), 0, agent))
+            agents.append((0, agent))
         return agent
     elif boarding_method == '_test_3r_shuffle':
         t1 = Point(0, -seats_right+0)
@@ -568,7 +568,7 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
 
             board[x][y] = agent
             execution_queue.put((0, agent))
-            agents.append((id(agent), 0, agent))
+            agents.append((0, agent))
         return agents
     elif boarding_method == '_test_3s_shuffle':
         t1 = Point(0, -seats_right+0)
@@ -585,7 +585,7 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
 
             board[x][y] = agent
             execution_queue.put((0, agent))
-            agents.append((id(agent), 0, agent))
+            agents.append((0, agent))
         return agents
     else:
         raise Exception(f"'{boarding_method}' boarding method not implemented")
@@ -594,4 +594,4 @@ def initialize(board, execution_queue: PriorityQueue, boarding_method):
         board[agent.coords.x][agent.coords.y] = agent
         execution_queue.put((time, agent))
 
-    return [(id(agent), time, agent)for time, agent in time_agents]
+    return [(time, agent) for time, agent in time_agents]

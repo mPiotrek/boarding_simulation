@@ -1,12 +1,12 @@
-recording to|from file
-embed ids in the agents
 comprehensive list of agent states|boarding methods
-check all tick_cnt occurences
 [częściowo jest] random if same order in execution_queue!
     jak to jest heap, to używanie random do porównania zmienia tylko sąsiadujące elementy
+check all tick_cnt occurences
 może dodać jakoś tile dependency? że agent jest wpychany na kolejkę dopiero gdy jakieś pole się zwolni?
 może generalnie metody do rzeczy typu chodzenie, odkładanie walizki, jestcośjeszcze?
 typing?
+[not necessary] embed ids in the agents
+[just pickle if u need] recording to|from file
 
 DONE:
 no_shuffle flag

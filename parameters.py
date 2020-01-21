@@ -24,7 +24,11 @@ walk_tick_cnt= 5
 skip_tick_cnt= 2
 
 
-framerate = 45
+display_width = 2*max_shuffle + plane_length
+display_height= plane_width
+display_scale = 64
+display_framerate = 15
+
 # Controlled by a passed parameter:
 # # no_shuffles = False
 # # no_stowing = False

@@ -15,20 +15,21 @@ from dataclasses import astuple
 pygame.init()
 
 
-object_size = 64
 red_color = (255, 0, 0, 1)
 blue_color = (0, 255, 0, 1)
 
 
 def get_seat_entity() -> Dict:
     # https://www.pygame.org/docs/ref/surface.html
-    seat_surface = Surface((object_size, object_size))
+    seat_surface = Surface(
+        (parameters.display_scale, parameters.display_scale))
     seat_surface.fill(blue_color)
     return {"surface": seat_surface}
 
 
 def get_passenger_entity() -> Dict:
-    passenger_surface = Surface((object_size, object_size))
+    passenger_surface = Surface(
+        (parameters.display_scale, parameters.display_scale))
     passenger_surface.fill(red_color)
     return {"surface": passenger_surface}
 
@@ -53,45 +54,37 @@ def render(entites, screen: Surface) -> None:
     screen.fill((255, 255, 255, 1))
     # draw
     for entity in entites:
-        screen.blit(entity[2]['surface'], [entity[0] * object_size,
-                                           entity[1] * object_size])
+        screen.blit(entity[2]['surface'], [entity[0] * parameters.display_scale,
+                                           entity[1] * parameters.display_scale])
     # update
     pygame.display.update()
 
 
-def play(boarding_mode, limit=2500, debug=False) -> None:
+def play(boarding_method, limit=2500, debug=False) -> None:
     seats = []
     agents = defaultdict(lambda: [None, None, get_passenger_entity()])
 
     clock = pygame.time.Clock()
     # grid size 3 * 2 * scale
-    screen = pygame.display.set_mode([(parameters.plane_length+2*parameters.max_shuffle) * object_size,
-                                      parameters.plane_width * object_size])
+    screen = pygame.display.set_mode([(parameters.plane_length+2*parameters.max_shuffle) * parameters.display_scale,
+                                      parameters.plane_width * parameters.display_scale])
 
-    prev_time = 0
-    curr_time = 0
-    for agent_id, time, agent in runner.run(boarding_mode, limit=limit, debug=debug):
-        # simulation logic
-        if time is not None:
-            curr_time = time
-        x, y = astuple(agent.coords)
-        y += parameters.seats_right
+    for time, updated_agents in runner.run(boarding_method, limit=limit, debug=debug):
+        for agent in updated_agents:
+            x, y = astuple(agent.coords)
+            # just because of the symmetry
+            agents[id(agent)][0] = x + parameters.max_shuffle
+            agents[id(agent)][1] = y + parameters.seats_right
+        # rendering
+        clock.tick(parameters.display_framerate)
+        render(chain(seats, agents.values()), screen)
 
-        # just because of symmetry
-        agents[agent_id][0] = x + parameters.max_shuffle
-        agents[agent_id][1] = y
-        if (time is not None) and (time > prev_time):
-            # rendering
-            clock.tick(parameters.framerate)
-            render(chain(seats, agents.values()), screen)
-
-            # handle events
-            if any(is_esc_down(event)
-                   or
-                   is_window_close_button_clicked(event)
-                   for event in pygame.event.get()):
-                break
-        prev_time = curr_time
+        # handle events
+        if any(is_esc_down(event)
+                or
+                is_window_close_button_clicked(event)
+                for event in pygame.event.get()):
+            break
     else:
         clock.tick(4)
         while not any(is_esc_down(event)
@@ -101,11 +94,11 @@ def play(boarding_mode, limit=2500, debug=False) -> None:
             pass
 
 
-play('random_order', limit=2500, debug=True)
-play('back_to_front', limit=2500, debug=True)
-play('front_to_back', limit=2500, debug=True)
-play('back_to_front_four', limit=2500, debug=True)
-play('front_to_back_four', limit=2500, debug=True)
-play('window_middle_aisle', limit=2500, debug=True)
-play('steffen_perfect', limit=2500, debug=True)
-play('steffen_modified', limit=2500, debug=True)
+play('random_order', debug=True)
+play('back_to_front', debug=True)
+play('front_to_back', debug=True)
+play('back_to_front_four', debug=True)
+play('front_to_back_four', debug=True)
+play('window_middle_aisle', debug=True)
+play('steffen_perfect', debug=True)
+play('steffen_modified', debug=True)
